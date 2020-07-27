@@ -12,7 +12,6 @@
   },
   "permissions": [
     "activeTab",
-    "declarativeContent",
     "<all_urls>"
   ]
 }
