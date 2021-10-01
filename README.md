@@ -1,4 +1,6 @@
 ## Teachable Booster 🚀 
+
+Find it here ➡️ [Google Chrome Webstore](https://chrome.google.com/webstore/detail/teachable-booster/daedpogehlchpldjgbnnloodlmanekec)
 ---
  
 I've been interacting with Teachable for about a week and found a few missing elements. This plugin is my attempt to add this.
