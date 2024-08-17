@@ -1,3 +1,9 @@
+async function getCurrentTab()
+let tab = await getCurrentTab();
+
 document.addEventListener('DOMContentLoaded', function () {
-    chrome.tabs.executeScript({file: "boost_teachable.js"})
+    chrome.scripting.executeScript({
+      target: {tabId: tab.id},
+      files: ["boost_teachable.js"]
+    });    
 }, false);
