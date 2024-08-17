@@ -1,83 +1,72 @@
-function boost_teachable() {
-    let existing_elems = document.querySelectorAll(".custom_duration.cumulative"),
-        playback_speed = document.querySelector(".playback-speed").textContent.trim().replace(/x$/, '');
-    for (let i = 0; i < existing_elems.length; i++) {
-        existing_elems[i].remove();
+function boostTeachable() {
+  // Remove existing custom duration elements
+  document.querySelectorAll(".custom_duration.cumulative").forEach(el => el.remove());
+
+  // Add CSS styles for fading highlight
+  const style = document.createElement('style');
+  style.textContent = `
+    .custom_fading_highlight {
+      background-color: #9ce60ab0;
+      animation: anim_fadeout 2s forwards 2s;
     }
-
-    function addStyle() {
-        let head = document.head || document.getElementsByTagName('head')[0],
-            style = document.createElement('style');
-
-        head.appendChild(style);
-        let css = `
-        .custom_fading_highlight {
-          background-color: #9ce60ab0;
-          animation-name:anim_fadeout;
-          animation-fill-mode:forwards;
-          animation-duration:2s;
-          animation-delay:2s;
-        }
-        @keyframes anim_fadeout {
-          0% {background-color:#9ce60ab0;}
-          100% { background-color:transparent;}
-        }
-        `
-        style.appendChild(document.createTextNode(css));
+    @keyframes anim_fadeout {
+      0% { background-color: #9ce60ab0; }
+      100% { background-color: transparent; }
     }
+  `;
+  document.head.appendChild(style);
 
-    addStyle()
+  // Helper function to format seconds into HH:MM:SS
+  function formatSeconds(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
 
-    function prettify_seconds(duration) {
-        let hrs = ~~(duration / 3600),
-            mins = ~~((duration % 3600) / 60),
-            secs = ~~duration % 60,
-            ret = "";
+    const formattedHours = hours > 0 ? `${hours}:` : "";
+    const formattedMinutes = `${minutes < 10 ? "0" : ""}${minutes}:`;
+    const formattedSeconds = `${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
 
-        if (hrs > 0) {
-            ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-        }
-        ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-        ret += "" + secs;
-        return ret;
-    }
+    return formattedHours + formattedMinutes + formattedSeconds;
+  }
 
-    function get_hour_span(total_seconds) {
-        let hour_span = document
-            .createElement('span');
-        hour_span.className = "custom_duration cumulative custom_fading_highlight"
-        hour_span.innerText = `[${prettify_seconds(total_seconds / playback_speed)} | ${prettify_seconds(total_seconds)}]`
-        return hour_span;
-    }
+  // Create a span element to display the duration
+  function createDurationSpan(totalSeconds, playbackSpeed) {
+    const span = document.createElement('span');
+    span.className = "custom_duration cumulative custom_fading_highlight";
+    span.textContent = `[${formatSeconds(totalSeconds / playbackSpeed)} | ${formatSeconds(totalSeconds)}]`;
+    return span;
+  }
 
-    let course_sections = document.querySelectorAll(".course-sidebar .row.lecture-sidebar .course-section");
-    for (let course_idx = 0; course_idx < course_sections.length; course_idx++) {
-        let course_section = course_sections[course_idx],
-            // video_durations = [],
-            total_seconds = 0,
-            lectures = course_section.querySelectorAll(".lecture-name");
+  // Get playback speed, handle potential null value
+  const playbackSpeedElement = document.querySelector(".playback-speed");
+  const playbackSpeed = playbackSpeedElement ? parseFloat(playbackSpeedElement.textContent.trim().replace(/x$/, '')) : 1;
 
-        for (let lecture_idx = 0; lecture_idx < lectures.length; lecture_idx++) {
-            let lecture = lectures[lecture_idx],
-                duration = lecture.textContent.trim().match(/\((.*?)\)$/)[1],
-                duration_split = duration.split(":"),
-                lecture_seconds = (parseInt(duration_split[0]) * 60) + parseInt(duration_split[1]);
+  // Iterate through course sections
+  document.querySelectorAll(".course-sidebar .row.lecture-sidebar .course-section").forEach(courseSection => {
+    let totalSeconds = 0;
 
-            // video_durations.push(duration);
-            total_seconds += lecture_seconds;
+    // Iterate through lectures within each section
+    courseSection.querySelectorAll(".lecture-name").forEach(lecture => {
+      const durationMatch = lecture.textContent.trim().match(/\((.*?)\)$/);
+      if (!durationMatch) return;
 
-            lecture.appendChild(get_hour_span(total_seconds));
-        }
+      const duration = durationMatch[1];
+      const [minutes, seconds] = duration.split(":").map(Number);
+      const lectureSeconds = (minutes * 60) + seconds;
 
+      totalSeconds += lectureSeconds;
 
-        course_section
-            .querySelector(".section-title")
-            .appendChild(get_hour_span(total_seconds));
-    }
+      // Append duration span to each lecture
+      lecture.appendChild(createDurationSpan(totalSeconds, playbackSpeed));
+    });
 
+    // Append total duration span to the section title
+    courseSection.querySelector(".section-title").appendChild(createDurationSpan(totalSeconds, playbackSpeed));
+  });
 }
 
+// Initialize the script if on a Teachable website
 if (document.querySelectorAll(".course-sidebar .row.lecture-sidebar .course-section").length > 0) {
-    console.log("[Boost Teachable Chrome Plugin] Found a teachable website. Powering it up 🚀")
-    boost_teachable();
+  console.log("[Boost Teachable Chrome Plugin] Found a teachable website. Powering it up 🚀");
+  boostTeachable();
 }
