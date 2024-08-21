@@ -1,9 +1,9 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Teachable Booster",
   "description": "Add the missing elements to every like section time, running time to Teachable courses.",
   "version": "1.0",
-  "browser_action": {
+  "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/16x16.png",
@@ -12,6 +12,7 @@
   },
   "permissions": [
     "activeTab",
-    "<all_urls>"
-  ]
+    "https://*.teachable.com/*"
+  ],
+  "host_permissions": []
 }
